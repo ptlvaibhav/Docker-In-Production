@@ -1,29 +1,34 @@
-FROM node:20
+FROM node:22-slim AS builder
 
-# Set working directory
 WORKDIR /app
 
-# Copy dependency files
 COPY package*.json ./
 
-# Install dependencies
-RUN npm install
+RUN npm ci --ignore-scripts
 
-# Copy application source
 COPY . .
 
-# Copy wait-for-it script
-COPY wait-for-it.sh /usr/local/bin/wait-for-it.sh
+RUN npm run build
+
+RUN npm prune --omit-dev
+
+
+FROM node:22-slim AS runner
+
+WORKDIR /app
+
+RUN apt-get update && apt-get install -y wget && rm -rf /var/lib/apt/lists/*
+
+COPY --from=builder /app/dist ./
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/wait-for-it.sh /usr/local/bin/wait-for-it.sh
+
 RUN chmod +x /usr/local/bin/wait-for-it.sh
 
-# Expose port
 EXPOSE 3000
 
-# Wait for DB, then start app
+RUN useradd -m appuser
+USER appuser
+
 ENTRYPOINT ["wait-for-it.sh", "blog-db:3306", "--"]
-CMD ["npm", "run", "dev"]
-
-
-
-
-# # docker build --platform platform-name --no-cache -t usr-name/image-name:version .
+CMD ["node","index.js"]
