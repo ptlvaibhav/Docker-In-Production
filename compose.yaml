@@ -31,7 +31,7 @@ services:
     secrets:
       - db_password
   blog-server:
-    image: ptlvaibhav/blog-demo-app:build-4c86c8c6f72d31ccb14eefca2e801585fdd14a33
+    image: ptlvaibhav/blog-demo-app:build-d3beccc45a05c037232ad2dbd4415bbeec786a24
     deploy:
       replicas: 1
       update_config:
@@ -69,7 +69,6 @@ volumes:
   blog-db-vol: null
 networks:
   blog-app-net: null
-
 secrets:
   db_password:
     external: true
