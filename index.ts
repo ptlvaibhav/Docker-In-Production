@@ -1,3 +1,4 @@
+import fs from 'node:fs'
 import express from 'express'
 import mysql from 'mysql2/promise'
 import dotenv from 'dotenv'
@@ -8,10 +9,21 @@ dotenv.config()
 const app = express()
 app.set('view engine', 'ejs')
 
+let dbUser = process.env.DB_USER;
+let dbPassword = process.env.DB_PASSWORD
+
+if (!dbUser && process.env.DB_USER_FILE){
+    dbUser = fs.readFileSync(process.env.DB_USER_FILE, 'utf-8').trim()
+}
+
+if (!dbPassword && process.env.DB_PASSWORD_FILE){
+    dbPassword = fs.readFileSync(process.env.DB_PASSWORD_FILE, 'utf-8').trim()
+}
+
 const pool = mysql.createPool({
     host: process.env.DB_HOST,
-    user: process.env.DB_USER,
-    password: process.env.DB_PASSWORD,
+    user: dbUser,
+    password: dbPassword,
     database: process.env.DB_NAME,
 })
 
