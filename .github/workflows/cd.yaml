@@ -25,22 +25,23 @@ jobs:
           propertyPath: 'services["blog-server"].image'
           value: ${{env.IMAGE_NAME}}:${{env.IMAGE_TAG}}
           commitChange: false
-      - name: Genrate token
-        id: genrate_token
+      - name: Generate token
+        id: generate_token
         uses: tibdex/github-app-token@v2
         with: 
           app_id: ${{secrets.APP_ID}}
           private_key: ${{secrets.APP_SECRET_KEY}}
       - name: Commit files
-        run:  |
-              git config --local user.name github-actions
-              git config --local user.email github-action@github.com
-              git add .
-              git commit -m "bump the image version ${{env.IMAGE_TAG}} [skip ci]"
+        run: |
+            git config --local user.name github-actions
+            git config --local user.email github-action@github.com
+            git add .
+            git commit -m "bump the image version ${{env.IMAGE_TAG}} [skip ci]"
+
       - name: Push changes
         uses: ad-m/github-push-action@master
         with:
-          github_token: ${{ steps.genrate_token.outputs.token }}
+          github_token: ${{ steps.generate_token.outputs.token }}
       - name: Build docker image
         run: docker build -t ${{env.IMAGE_NAME}}:${{env.IMAGE_TAG}} --platform linux/amd64 .
       - name: Login into Docker Hub
